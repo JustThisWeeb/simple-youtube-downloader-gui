@@ -9,5 +9,6 @@ One note I'd like to make is that I actually replaced the original .py file with
 None at the moment. 
 
 # Requirements:
-pytube - py -m pip install pytube in command prompt
+pytube - (in the command prompt) 
+py -m pip install pytube in command prompt
 
