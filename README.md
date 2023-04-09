@@ -10,5 +10,5 @@ None at the moment.
 
 # Requirements:
 pytube - (in the command prompt) 
-py -m pip install pytube in command prompt
+py -m pip install pytube
 
