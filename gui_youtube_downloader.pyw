@@ -37,7 +37,6 @@ def read_directory(): #reading the contents of the save_directory file
         win.mainloop()
 
 
-
 def single_video_download(): #single video download method
     link = url.get() #getting the video url from the entry box
     youtube_object = YouTube(link) #creating youtube object
@@ -51,16 +50,18 @@ def single_video_download(): #single video download method
     youtube_object1080 = youtube_object.streams.get_by_itag(37) #getting highest resolution
     try:
         directory = read_directory()[0]
-        youtube_object1080.download(directory)
-        print(f"{video_title} downloaded successfully\n")
-        download_status.config(text=f"downloaded {video_title} successfully!")
+        youtube_object1080.download()
+        print(f"{video_title} downloaded successfully at 1080p\n")
+        download_status.config(text=f"downloaded {video_title} successfully at 1080p resolution!")
         download_status.update()
     except:
+        print("failed to download at 1080p so trying with the highest possible resolution (usually 720p)...")
         try:
             youtube_object = youtube_object.streams.get_highest_resolution()
+            res = youtube_object.resolution
             youtube_object.download(directory)
-            print(f"{video_title} downloaded successfully\n")
-            download_status.config(text=f"downloaded {video_title} successfully!")
+            print(f"{video_title} downloaded successfully at {res} resolution and {youtube_object.fps}fps {youtube_object.video_codec} codec  {youtube_object.bitrate} bitrate {youtube_object.filesize_mb} mb size\n")
+            download_status.config(text=f"downloaded {video_title} successfully at {res} resolution and {youtube_object.fps}fps! ({youtube_object.filesize_mb:.2f} mb size)")
             download_status.update()
         except:
             print("there was an error while downloading the video")
@@ -88,8 +89,7 @@ def playlist_dowload():
         print(f"Downloading {video_title}...") #a print for debugging
 
         if f"{video_title}.mp4" in os.listdir(read_directory()[0]): #seeing if the video has already been downloaded
-            print("file already downloaded\n")
-            progressbar.step(percent_per_vid)
+            print("file already downloaded")
             downloaded_videos += 1
             total_percentage += percent_per_vid
             progress_percent.config(text=f'{total_percentage:.2f}%')
@@ -104,24 +104,24 @@ def playlist_dowload():
             vid_link = video.watch_url
             youtube_object = YouTube(vid_link)
             youtube_object1080 = youtube_object.streams.get_by_itag(37) #itag 37 = 1080p video - getting the stream and downloading it
-
             try: #trying to download it at 1080p
                 directory = read_directory()[0] #getting the save directory
                 youtube_object1080.download(directory) # downloading the video
-                print(f"{video_title} downloaded successfully\n")
+                print(f"{video_title} downloaded successfully at 1080p\n")
                 current_video.config(text=f"{video_title} downloaded successfully", bg='#0F0F0F', fg='#fafafa')
             except: #if it fails to download it we try to download the highest resolution it can download
+                print("failed to download 1080p version. trying to download with the highest possible resolution (usually 720p)")
                 try: #trying to download the highest resolution
                     youtube_object = youtube_object.streams.get_highest_resolution()
                     youtube_object.download(directory) #downloading video
-                    print(f"{video_title} downloaded successfully\n")
+                    print(f"{video_title} downloaded successfully at {youtube_object.resolution} resolution\n")
                     current_video.config(text=f"{video_title} downloaded successfully", bg='#0F0F0F', fg='#fafafa')
                 except: #there's some other error preventing it from downloading
                     print("there was an error while downloading the video")
                     current_video.config(text=f"there was an error while downloading the video", bg='#0F0F0F', fg='#fafafa')
 
             downloaded_videos += 1 #updating the taskbar
-            progressbar.step(percent_per_vid)
+            progressbar.update_idletasks()
             total_percentage += percent_per_vid
             progress_percent.config(text=f'{total_percentage:.2f}%')
             downloaded.config(text=f'{downloaded_videos}/{number_of_vids} downloaded')
