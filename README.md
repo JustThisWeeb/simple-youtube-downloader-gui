@@ -21,10 +21,15 @@ ffmpeg -
 64-bit: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z
 32-bit: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-32bit-static.7z
 
-![image](https://user-images.githubusercontent.com/79314361/231166270-f2409d55-3524-4db9-b056-a5d1872f3544.png)
+1. Open the Start menu and search for "Environment Variables".
+2. Click on "Edit the system environment variables".
+3. Click on the "Environment Variables" button.
+4. Under "System Variables", find the "Path" variable and click "Edit".
+5. Click "New" and enter the path to the FFmpeg bin directory (e.g. "C:\ffmpeg\bin").
+6. Click "OK" to close all the windows.
 
 
-# Possible errors: 
+# Possible issues: 
 1. Titles - while I have somewhat mitigated the issue there is just simply a bug with pytube. That means that sometimes the video titles won't be available. If that happens just try to download the video again until it works
 
 2. ffmpeg not being recognized - open the .pyw file using some ide (You could use the IDLE ide which comes with python), scroll to line 52 and change ffmpeg to the directory of your ffmpeg.exe file (e.g. C:\\Users\\User\\Downloads\\ffmpeg-6.0-full_build\\ffmpeg-6.0-full_build\\bin\\ffmpeg.exe) and make sure to make the backwards slashes double (C:\Users\User --> C:\\Users\\User) to avoid any possible issues with it
