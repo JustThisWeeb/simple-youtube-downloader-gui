@@ -123,7 +123,7 @@ def single_video_download(): #single video download method
 
     #checking if ffmpeg is installed or not
     try:
-        result = subprocess.run([f'{ffmpeg}', '-help'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+        result = subprocess.run([f'{ffmpeg}', '--help'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         ffmpeg_installed = True
     except subprocess.CalledProcessError:
         ffmpeg_installed = False
@@ -203,7 +203,7 @@ def playlist_dowload():
 
         # checking if ffmpeg is installed or not
         try:
-            result = subprocess.run([f'{ffmpeg}', '-version'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
+            result = subprocess.run([f'{ffmpeg}', '--help'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
             ffmpeg_installed = True
         except subprocess.CalledProcessError:
             ffmpeg_installed = False
