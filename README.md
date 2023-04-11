@@ -13,7 +13,6 @@ if you do have ffmpeg installed and the videos get downloaded in lower resolutio
 
 # future plans 
 - Fixing the progressbar (again)
-- Making support for ffmpegless users (will probably do this one today)
 
 
 # Requirements:
