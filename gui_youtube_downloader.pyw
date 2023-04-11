@@ -3,6 +3,9 @@ from pytube import Playlist
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
+from moviepy.video.io.VideoFileClip import VideoFileClip
+from moviepy.audio.io.AudioFileClip import AudioFileClip
+import subprocess
 import os
 
 def directory_change(): #directory change method
@@ -36,36 +39,89 @@ def read_directory(): #reading the contents of the save_directory file
         Button(win, text="Change dir", command=directory_change).place(x=120, y=75)
         win.mainloop()
 
+def merging(video_path, audio_path, video_title, output_path, download_type): #merging the video and audio files and deleting them after creating a new merged file - download type is to know from which function merging got called.
+    if download_type == "single":
+        download_status.config(text="Merging the 1080p audio and video files...") #status update
+        download_status.update()
+    else:
+        current_video.config(text="Merging the 1080p audio and video files...")
+        current_video.update()
+
+    print("merging the audio and video file")
+    try:
+        cmd = f'ffmpeg -y -i "{video_path}" -i "{audio_path}" -c:v copy -c:a aac -strict experimental "{output_path}"' #cmd command
+        subprocess.call(cmd, shell=True) #executing said command
+        print("merged the video and audio file successfully") #status updates
+        if download_type == "single":
+            download_status.config(text="Merged the video and audio files successfully!") # status updates
+            download_status.update()
+        else:
+            current_video.config(text="Merged the video and audio files successfully!")
+            current_video.update()
+
+    except: #there was some error that occured during the merge
+        print("an error has occured during the merge") #status update
+        if download_type == "single":
+            download_status.config(text="An error has occured during the merge!") # status updates
+            download_status.update()
+        else:
+            current_video.config(text="An error has occured during the merge!")
+            current_video.update()
+
+    print("deleting seperate audio and video files...")
+    try:
+        os.remove(video_path) #removing the vide and audio files
+        os.remove(audio_path)
+        print("deleted the seperate files successfully!")
+    except:
+        print("Couldn't delete the original files")
+
 
 def single_video_download(): #single video download method
     link = url.get() #getting the video url from the entry box
     youtube_object = YouTube(link) #creating youtube object
     try:
-        video_title = youtube_object.title
+        video_title = youtube_object.title #getting the title and because sometimes it just gives me an error when trying to get the title I will be catching such situations here
     except:
-        video_title = "not available"
-    print(f"downloading {video_title}")
+        try:
+            youtube_object = YouTube(link) #retrying
+            video_title = youtube_object.title
+        except:
+            video_title = "not available" #default for when there's no title.
+
+    print(f"downloading {video_title}") #status updates
     download_status.config(text=f"downloading {video_title}...")
     download_status.update()
-    youtube_object1080 = youtube_object.streams.get_by_itag(37) #getting highest resolution
+    youtube_object1080 = youtube_object.streams.filter(file_extension='mp4', res='1080p', only_video=True).first()#getting 1080p video resolution
+    print(youtube_object1080.resolution)
+    youtube_object_audio = youtube_object.streams.filter(file_extension='mp4', only_audio=True).first() #getting the audio for said vide
     try:
-        directory = read_directory()[0]
-        youtube_object1080.download()
-        print(f"{video_title} downloaded successfully at 1080p\n")
+        directory = read_directory()[0] #getting the save directory
+        if "." in video_title:
+            video_title = video_title.replace(".", "")
+        youtube_object1080.download(output_path=directory, filename=f"{video_title}.mp4") #downloading the 1080p video
+        youtube_object_audio.download(output_path=directory, filename=f'{video_title}.mp3') #downloading the audio file
+        print(f"{video_title} downloaded successfully at 1080p\n") #status updates
         download_status.config(text=f"downloaded {video_title} successfully at 1080p resolution!")
         download_status.update()
+        merging(video_path=f'{directory}\\{video_title}.mp4', audio_path=f'{directory}\\{video_title}.mp3', video_title=video_title, output_path=f"{directory}\\{video_title} - 1080p.mp4", download_type="single") #calling the merging function
     except:
-        print("failed to download at 1080p so trying with the highest possible resolution (usually 720p)...")
+        print("failed to download at 1080p so trying with the highest possible resolution (usually 720p)...") #failed to download 1080p meaning there was some error or the video doesn't have 1080p
         try:
-            youtube_object = youtube_object.streams.get_highest_resolution()
-            res = youtube_object.resolution
-            youtube_object.download(directory)
+            try:
+                os.remove(f'{directory}\\{video_title}.mp3')
+            except:
+                print("no audio file to be deleted")
+            youtube_object = youtube_object.streams.get_highest_resolution() #getting the highest resolution it can get
+            res = youtube_object.resolution # resolution for said video
+            youtube_object.download(directory) #downloading it
+            #status updates
             print(f"{video_title} downloaded successfully at {res} resolution and {youtube_object.fps}fps {youtube_object.video_codec} codec  {youtube_object.bitrate} bitrate {youtube_object.filesize_mb} mb size\n")
             download_status.config(text=f"downloaded {video_title} successfully at {res} resolution and {youtube_object.fps}fps! ({youtube_object.filesize_mb:.2f} mb size)")
             download_status.update()
         except:
-            print("there was an error while downloading the video")
-            download_status.config(text=f"there was an error while downloading {video_title}")
+            print("there was an error while downloading the video") # some other error occured
+            download_status.config(text=f"there was an error while downloading {video_title}") #status updates
             download_status.update()
 
 def playlist_dowload():
@@ -81,34 +137,52 @@ def playlist_dowload():
             video_title = video.title
         except:
             print("error while getting the title of the video")
-            video_title = "n/a" #the file is still going to be saved as the original title as this is just for the gui and prints
+            video_title = "not available" #the file is still going to be saved as the original title as this is just for the gui and prints
 
         current_video.config(text=f'Currently downloading: {video_title}', bg='#0F0F0F', fg='#fafafa') #displaying currently downloading video
         current_video.update() #updating the gui
 
-        print(f"Downloading {video_title}...") #a print for debugging
+        print(f"Downloading {video_title}...")
 
         if f"{video_title}.mp4" in os.listdir(read_directory()[0]): #seeing if the video has already been downloaded
-            print("file already downloaded")
+            print("file already downloaded\n")
+            current_video.config(text=f"{video_title} already downloaded")
             downloaded_videos += 1
             total_percentage += percent_per_vid
             progress_percent.config(text=f'{total_percentage:.2f}%')
             downloaded.config(text=f'{downloaded_videos}/{number_of_vids} downloaded')
             downloaded.update() #updating downloaded counter on gui
             progress_percent.update() #updating progress percent (pp) on the gui
+            progressbar.update_idletasks()
             if downloaded_videos == number_of_vids:
                 progressbar.stop() # resetting and stopping the progressbar
             continue
 
         try: #huge try except for all of this just in case heart
             vid_link = video.watch_url
-            youtube_object = YouTube(vid_link)
-            youtube_object1080 = youtube_object.streams.get_by_itag(37) #itag 37 = 1080p video - getting the stream and downloading it
-            try: #trying to download it at 1080p
-                directory = read_directory()[0] #getting the save directory
-                youtube_object1080.download(directory) # downloading the video
-                print(f"{video_title} downloaded successfully at 1080p\n")
-                current_video.config(text=f"{video_title} downloaded successfully", bg='#0F0F0F', fg='#fafafa')
+            youtube_object = YouTube(vid_link) #same procedure as the single video downloads except it's for playlists
+            youtube_object1080 = youtube_object.streams.filter(file_extension='mp4', res='1080p',
+                                                               only_video=True).first()  # getting 1080p video resolution
+            youtube_object_audio = youtube_object.streams.filter(file_extension='mp4',
+                                                                 only_audio=True).first()  # getting the audio for said vide
+            try:
+                current_video.config(text=f"Downloading {video_title}...")
+                directory = read_directory()[0]  # getting the save directory
+                print("checking if the title is valid...")
+                if "." in video_title: #This can cause issues if the title ends in ... as windows would just ignore and remove them but the title of the video still has it
+                    video_title.replace(".", "")
+                print("downloading seperate streams...")
+                youtube_object1080.download(output_path=directory, filename=f'{video_title}.mp4')  # downloading the 1080p video
+                youtube_object_audio.download(output_path=directory,
+                                              filename=f'{video_title}.mp3')  # downloading the audio file
+                print(f"{video_title} downloaded successfully at 1080p\n")  # status updates
+                current_video.config(text=f"downloaded {video_title} successfully at 1080p resolution!")
+                current_video.update()
+                print("merging the audio and video files")
+                merging(video_path=f'{directory}\\{video_title}.mp4', audio_path=f'{directory}\\{video_title}.mp3',
+                        video_title=video_title,
+                        output_path=f"{directory}\\{video_title} - 1080p.mp4", download_type='playlist')  #calling the merging function
+
             except: #if it fails to download it we try to download the highest resolution it can download
                 print("failed to download 1080p version. trying to download with the highest possible resolution (usually 720p)")
                 try: #trying to download the highest resolution
@@ -129,6 +203,7 @@ def playlist_dowload():
             progress_percent.update() #updating progress percent (pp) on the gui
             if downloaded_videos == number_of_vids:
                 progressbar.stop() # resetting and stopping the progressbar
+
         except: #some other error occured during this entire proccess
             print(f"failed to download video {video_title}")
             current_video.config(text=f'failed to download video "{video_title}"',bg='#0F0F0F', fg='#fafafa')
