@@ -37,6 +37,6 @@ ffmpeg -
 # Possible issues: 
 1. Titles - while I have somewhat mitigated the issue there is just simply a bug with pytube. That means that sometimes the video titles won't be available. If that happens just try to download the video again until it works
 
-2. ffmpeg not being recognized - open the .pyw file using some ide (You could use the IDLE ide which comes with python), go to line 9 and change 'ffmpeg' to the directory of your ffmpeg.exe file (e.g. C:\\Users\\User\\Downloads\\ffmpeg-6.0-full_build\\ffmpeg-6.0-full_build\\bin\\ffmpeg.exe) and make sure to make the backwards slashes double (C:\Users\User --> C:\\Users\\User) to avoid any possible issues with it. 
+2. ffmpeg not being recognized - open the .pyw file using some ide (You could use the IDLE ide which comes with python), go to line 9 and change 'ffmpeg' to the directory of your ffmpeg.exe file (e.g. C:\\Users\\User\\Downloads\\ffmpeg-6.0-full_build\\ffmpeg-6.0-full_build\\bin\\ffmpeg.exe) and make sure to make the backwards slashes double (C:\Users\User --> C:\\\Users\\\User) to avoid any possible issues with it. 
 
 
