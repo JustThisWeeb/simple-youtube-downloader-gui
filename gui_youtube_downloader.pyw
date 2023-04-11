@@ -16,6 +16,7 @@ def directory_change(): #directory change method
     messagebox.showinfo(title = "directory changed!", message=f"changed the save directory to:\n{new_directory}") #showing message
     return f"directory changed to {new_directory}"
 
+
 def read_directory(): #reading the contents of the save_directory file
     files = os.listdir()
     present = False
@@ -38,6 +39,7 @@ def read_directory(): #reading the contents of the save_directory file
         new_dir.place(x=10, y=50)
         Button(win, text="Change dir", command=directory_change).place(x=120, y=75)
         win.mainloop()
+
 
 def merging(video_path, audio_path, video_title, output_path, download_type): #merging the video and audio files and deleting them after creating a new merged file - download type is to know from which function merging got called.
     if download_type == "single":
@@ -76,6 +78,7 @@ def merging(video_path, audio_path, video_title, output_path, download_type): #m
     except:
         print("Couldn't delete the original files")
 
+
 def download_720p_video(link):
     youtube_object = YouTube(link) #creating youtube object
     try:
@@ -87,7 +90,8 @@ def download_720p_video(link):
         except:
             video_title = "not available" #default for when there's no title.
 
-    try:
+    if True:
+        directory = read_directory()[0]
         youtube_object = youtube_object.streams.get_highest_resolution()  # getting the highest resolution it can get
         res = youtube_object.resolution  # resolution for said video
         youtube_object.download(directory)  # downloading it
@@ -97,7 +101,7 @@ def download_720p_video(link):
         download_status.config(
             text=f"downloaded {video_title} successfully at {res} resolution and {youtube_object.fps}fps! ({youtube_object.filesize_mb:.2f} mb size)")
         download_status.update()
-    except:
+    else:
         download_status.config(text=f"error while downloading {video_title}...")
         download_status.update()
         print(f"error while downloading {video_title}")
@@ -125,46 +129,48 @@ def single_video_download(): #single video download method
     try:
         result = subprocess.run([f'{ffmpeg}', '--help'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
         ffmpeg_installed = True
-    except subprocess.CalledProcessError:
+    except FileNotFoundError:
         ffmpeg_installed = False
+    except subprocess.CalledProcessError:
+        print("ffmpeg has not been installed correctly")
 
     if not ffmpeg_installed:
         print("ffmpeg is not installed. Lower resolution video will be installed instead...")
         download_720p_video(link=link) #downloading a 720p video instead of 1080p
+    else:
+        print(youtube_object.watch_url)
+        youtube_object1080 = youtube_object.streams.filter(file_extension='mp4', res='1080p', only_video=True).first()#getting 1080p video resolution
+        youtube_object_audio = youtube_object.streams.filter(file_extension='mp4', only_audio=True).first() #getting the audio for said vide
 
-    print(youtube_object.watch_url)
-    youtube_object1080 = youtube_object.streams.filter(file_extension='mp4', res='1080p', only_video=True).first()#getting 1080p video resolution
-    youtube_object_audio = youtube_object.streams.filter(file_extension='mp4', only_audio=True).first() #getting the audio for said vide
-
-    try:
-        directory = read_directory()[0] #getting the save directory
-        if "." in video_title:
-            video_title = video_title.replace(".", "")
-        youtube_object1080.download(output_path=directory, filename=f"{video_title}.mp4") #downloading the 1080p video
-        youtube_object_audio.download(output_path=directory, filename=f'{video_title}.mp3') #downloading the audio file
-        print(f"{video_title} downloaded successfully at 1080p\n") #status updates
-        download_status.config(text=f"downloaded {video_title} successfully at 1080p resolution!")
-        download_status.update()
-        merging(video_path=f'{directory}\\{video_title}.mp4', audio_path=f'{directory}\\{video_title}.mp3', video_title=video_title, output_path=f"{directory}\\{video_title} - 1080p.mp4", download_type="single") #calling the merging function
-
-    except:
-        print("failed to download at 1080p so trying with the highest possible resolution (usually 720p)...") #failed to download 1080p meaning there was some error or the video doesn't have 1080p
         try:
-            try:
-                os.remove(f'{directory}\\{video_title}.mp3')
-            except:
-                print("no audio file to be deleted")
-            youtube_object = youtube_object.streams.get_highest_resolution() #getting the highest resolution it can get
-            res = youtube_object.resolution # resolution for said video
-            youtube_object.download(directory) #downloading it
-            #status updates
-            print(f"{video_title} downloaded successfully at {res} resolution and {youtube_object.fps}fps {youtube_object.video_codec} codec  {youtube_object.bitrate} bitrate {youtube_object.filesize_mb} mb size\n")
-            download_status.config(text=f"downloaded {video_title} successfully at {res} resolution and {youtube_object.fps}fps! ({youtube_object.filesize_mb:.2f} mb size)")
+            directory = read_directory()[0] #getting the save directory
+            if "." in video_title:
+                video_title = video_title.replace(".", "")
+            youtube_object1080.download(output_path=directory, filename=f"{video_title}.mp4") #downloading the 1080p video
+            youtube_object_audio.download(output_path=directory, filename=f'{video_title}.mp3') #downloading the audio file
+            print(f"{video_title} downloaded successfully at 1080p\n") #status updates
+            download_status.config(text=f"downloaded {video_title} successfully at 1080p resolution!")
             download_status.update()
+            merging(video_path=f'{directory}\\{video_title}.mp4', audio_path=f'{directory}\\{video_title}.mp3', video_title=video_title, output_path=f"{directory}\\{video_title} - 1080p.mp4", download_type="single") #calling the merging function
+
         except:
-            print("there was an error while downloading the video") # some other error occured
-            download_status.config(text=f"there was an error while downloading {video_title}") #status updates
-            download_status.update()
+            print("failed to download at 1080p so trying with the highest possible resolution (usually 720p)...") #failed to download 1080p meaning there was some error or the video doesn't have 1080p
+            try:
+                try:
+                    os.remove(f'{directory}\\{video_title}.mp3')
+                except:
+                    print("no audio file to be deleted")
+                youtube_object = youtube_object.streams.get_highest_resolution() #getting the highest resolution it can get
+                res = youtube_object.resolution # resolution for said video
+                youtube_object.download(directory) #downloading it
+                #status updates
+                print(f"{video_title} downloaded successfully at {res} resolution and {youtube_object.fps}fps {youtube_object.video_codec} codec  {youtube_object.bitrate} bitrate {youtube_object.filesize_mb} mb size\n")
+                download_status.config(text=f"downloaded {video_title} successfully at {res} resolution and {youtube_object.fps}fps! ({youtube_object.filesize_mb:.2f} mb size)")
+                download_status.update()
+            except:
+                print("there was an error while downloading the video") # some other error occured
+                download_status.config(text=f"there was an error while downloading {video_title}") #status updates
+                download_status.update()
 
 def playlist_dowload():
     playlist_link = playlist_url.get()
@@ -205,66 +211,68 @@ def playlist_dowload():
         try:
             result = subprocess.run([f'{ffmpeg}', '--help'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
             ffmpeg_installed = True
-        except subprocess.CalledProcessError:
+        except FileNotFoundError:
             ffmpeg_installed = False
+        except subprocess.CalledProcessError:
+            print("ffmpeg has not been installed correctly")
 
         if not ffmpeg_installed:
             print("ffmpeg is not installed. Lower resolution video will be installed instead...")
             download_720p_video(link=video.watch_url)  # downloading a 720p video instead of 1080p
             continue
+        else:
 
+            try: #huge try except for all of this just in case heart
+                vid_link = video.watch_url
+                youtube_object = YouTube(vid_link) #same procedure as the single video downloads except it's for playlists
+                youtube_object1080 = youtube_object.streams.filter(file_extension='mp4', res='1080p',
+                                                                   only_video=True).first()  # getting 1080p video resolution
+                youtube_object_audio = youtube_object.streams.filter(file_extension='mp4',
+                                                                     only_audio=True).first()  # getting the audio for said vide
+                try:
+                    current_video.config(text=f"Downloading {video_title}...")
+                    directory = read_directory()[0]  # getting the save directory
+                    print("checking if the title is valid...")
+                    if "." in video_title: #This can cause issues if the title ends in ... as windows would just ignore and remove them but the title of the video still has it
+                        video_title.replace(".", "")
+                    print("downloading seperate streams...")
+                    youtube_object1080.download(output_path=directory, filename=f'{video_title}.mp4')  # downloading the 1080p video
+                    youtube_object_audio.download(output_path=directory,
+                                                  filename=f'{video_title}.mp3')  # downloading the audio file
+                    print(f"{video_title} downloaded successfully at 1080p\n")  # status updates
+                    current_video.config(text=f"downloaded {video_title} successfully at 1080p resolution!")
+                    current_video.update()
+                    print("merging the audio and video files")
+                    merging(video_path=f'{directory}\\{video_title}.mp4', audio_path=f'{directory}\\{video_title}.mp3',
+                            video_title=video_title,
+                            output_path=f"{directory}\\{video_title} - 1080p.mp4", download_type='playlist')  #calling the merging function
 
-        try: #huge try except for all of this just in case heart
-            vid_link = video.watch_url
-            youtube_object = YouTube(vid_link) #same procedure as the single video downloads except it's for playlists
-            youtube_object1080 = youtube_object.streams.filter(file_extension='mp4', res='1080p',
-                                                               only_video=True).first()  # getting 1080p video resolution
-            youtube_object_audio = youtube_object.streams.filter(file_extension='mp4',
-                                                                 only_audio=True).first()  # getting the audio for said vide
-            try:
-                current_video.config(text=f"Downloading {video_title}...")
-                directory = read_directory()[0]  # getting the save directory
-                print("checking if the title is valid...")
-                if "." in video_title: #This can cause issues if the title ends in ... as windows would just ignore and remove them but the title of the video still has it
-                    video_title.replace(".", "")
-                print("downloading seperate streams...")
-                youtube_object1080.download(output_path=directory, filename=f'{video_title}.mp4')  # downloading the 1080p video
-                youtube_object_audio.download(output_path=directory,
-                                              filename=f'{video_title}.mp3')  # downloading the audio file
-                print(f"{video_title} downloaded successfully at 1080p\n")  # status updates
-                current_video.config(text=f"downloaded {video_title} successfully at 1080p resolution!")
-                current_video.update()
-                print("merging the audio and video files")
-                merging(video_path=f'{directory}\\{video_title}.mp4', audio_path=f'{directory}\\{video_title}.mp3',
-                        video_title=video_title,
-                        output_path=f"{directory}\\{video_title} - 1080p.mp4", download_type='playlist')  #calling the merging function
+                except: #if it fails to download it we try to download the highest resolution it can download
+                    print("failed to download 1080p version. trying to download with the highest possible resolution (usually 720p)")
+                    try: #trying to download the highest resolution
+                        youtube_object = youtube_object.streams.get_highest_resolution()
+                        youtube_object.download(directory) #downloading video
+                        print(f"{video_title} downloaded successfully at {youtube_object.resolution} resolution\n")
+                        current_video.config(text=f"{video_title} downloaded successfully", bg='#0F0F0F', fg='#fafafa')
+                    except: #there's some other error preventing it from downloading
+                        print("there was an error while downloading the video")
+                        current_video.config(text=f"there was an error while downloading the video", bg='#0F0F0F', fg='#fafafa')
 
-            except: #if it fails to download it we try to download the highest resolution it can download
-                print("failed to download 1080p version. trying to download with the highest possible resolution (usually 720p)")
-                try: #trying to download the highest resolution
-                    youtube_object = youtube_object.streams.get_highest_resolution()
-                    youtube_object.download(directory) #downloading video
-                    print(f"{video_title} downloaded successfully at {youtube_object.resolution} resolution\n")
-                    current_video.config(text=f"{video_title} downloaded successfully", bg='#0F0F0F', fg='#fafafa')
-                except: #there's some other error preventing it from downloading
-                    print("there was an error while downloading the video")
-                    current_video.config(text=f"there was an error while downloading the video", bg='#0F0F0F', fg='#fafafa')
+                downloaded_videos += 1 #updating the taskbar
+                progressbar.update_idletasks()
+                total_percentage += percent_per_vid
+                progress_percent.config(text=f'{total_percentage:.2f}%')
+                downloaded.config(text=f'{downloaded_videos}/{number_of_vids} downloaded')
+                downloaded.update() #updating downloaded counter on gui
+                progress_percent.update() #updating progress percent (pp) on the gui
+                if downloaded_videos == number_of_vids:
+                    progressbar.stop() # resetting and stopping the progressbar
 
-            downloaded_videos += 1 #updating the taskbar
-            progressbar.update_idletasks()
-            total_percentage += percent_per_vid
-            progress_percent.config(text=f'{total_percentage:.2f}%')
-            downloaded.config(text=f'{downloaded_videos}/{number_of_vids} downloaded')
-            downloaded.update() #updating downloaded counter on gui
-            progress_percent.update() #updating progress percent (pp) on the gui
-            if downloaded_videos == number_of_vids:
-                progressbar.stop() # resetting and stopping the progressbar
+            except: #some other error occured during this entire proccess
+                print(f"failed to download video {video_title}")
+                current_video.config(text=f'failed to download video "{video_title}"',bg='#0F0F0F', fg='#fafafa')
 
-        except: #some other error occured during this entire proccess
-            print(f"failed to download video {video_title}")
-            current_video.config(text=f'failed to download video "{video_title}"',bg='#0F0F0F', fg='#fafafa')
-
-        current_video.update() #updating the window so it shows the download status
+            current_video.update() #updating the window so it shows the download status
 
 
 root = Tk() #creating tkinter object
