@@ -6,7 +6,14 @@ now it's not really perfect but I did also make it in just a few hours while lea
 
 One note I'd like to make is that I actually replaced the original .py file with a .pyw file which only really prevents the command prompt from opening up.
 
-At the end of every downloaded 1080p video you will see a "- 1080p" being added. This is mainly due to ffmpeg not liking when there are 2 files with the same name in the same folder but also to let you know that this is the 1080p video. 
+At the end of every downloaded 1080p video you will see a "- 1080p" being added. This is mainly due to ffmpeg not liking when there are 2 files with the same name in the same folder but also to let you know that this is the 1080p video. - Now it will also say 2160p and 1440p depending on the resolution.
+
+!!! One thing I would like to note is that while I have managed to download 4k and 1440p videos using this "updated" version it's somewhat random... For example I have not managed to download a single LTT video in 4k despite them having 4k yet was able to download 4k demos such as the one shown in the screenshot below. I have also managed to download 1440p demos in 1440p but as I said it's pretty random and doesn't always work. That said it does manage to download them in 1080p but still felt I should point that out.
+
+![aaasdasdsa](https://user-images.githubusercontent.com/79314361/232321656-03fb504e-9f6c-4f6f-942a-d14c46003606.jpg)
+
+
+
 
 if you do have ffmpeg installed and the videos get downloaded in lower resolutions then you could try the fix I've listed in the Possible issues part of this readme
 
