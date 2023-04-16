@@ -6,7 +6,7 @@ from tkinter import ttk
 import subprocess
 import os
 
-ffmpeg = "ffmpeg"
+ffmpeg = "C:\\Downloads\\ffmpeg-6.0-full_build\\ffmpeg-6.0-full_build\\bin\\ffmpeg.exe"
 
 def directory_change(): #directory change method
     new_directory = new_dir.get()
@@ -74,9 +74,9 @@ def merging(video_path, audio_path, video_title, output_path, download_type): #m
     try:
         os.remove(video_path) #removing the vide and audio files
         os.remove(audio_path)
-        print("deleted the seperate files successfully!")
+        print("deleted the seperate files successfully!\n")
     except:
-        print("Couldn't delete the original files")
+        print("Couldn't delete the original files\n")
 
 
 def download_720p_video(link):
@@ -90,7 +90,7 @@ def download_720p_video(link):
         except:
             video_title = "not available" #default for when there's no title.
 
-    if True:
+    if True: #just realized what this is doing but it's 4 am and I am not willing to think about it... I think I wanted to add a bool somewhere around here...
         directory = read_directory()[0]
         youtube_object = youtube_object.streams.get_highest_resolution()  # getting the highest resolution it can get
         res = youtube_object.resolution  # resolution for said video
@@ -108,6 +108,7 @@ def download_720p_video(link):
 
 
 
+#single video downloads
 def single_video_download(): #single video download method
     link = url.get() #getting the video url from the entry box
     youtube_object = YouTube(link) #creating youtube object
@@ -125,6 +126,7 @@ def single_video_download(): #single video download method
     download_status.config(text=f"downloading {video_title}...")
     download_status.update()
 
+
     #checking if ffmpeg is installed or not
     try:
         result = subprocess.run([f'{ffmpeg}', '--help'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
@@ -137,24 +139,48 @@ def single_video_download(): #single video download method
     if not ffmpeg_installed:
         print("ffmpeg is not installed. Lower resolution video will be installed instead...")
         download_720p_video(link=link) #downloading a 720p video instead of 1080p
+
+
+
     else:
+
         print(youtube_object.watch_url)
-        youtube_object1080 = youtube_object.streams.filter(file_extension='mp4', res='1080p', only_video=True).first()#getting 1080p video resolution
+        watch_url = youtube_object.watch_url
+        youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p', only_video=True).first()#getting 2160p video resolution
+        if youtube_object_high_res is None:
+            print("failed to get 4k stream... trying 1440p") #this can be caused by the video not having 4k to begin with or... well youtube being weird and pytube being inconsistent
+            youtube_object = YouTube(watch_url)
+            youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p', only_video=True).first()
+            if youtube_object_high_res is None:
+                print("failed to get 1440p stream... trying 1080p") #same as 4k
+                youtube_object = YouTube(watch_url)
+                youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p', only_video=True).first() #no real way to notify someone if the file is being downloaded
+            else:
+                print("got 1440p stream")
+        else:
+            print("got 4k stream")
+
         youtube_object_audio = youtube_object.streams.filter(file_extension='mp4', only_audio=True).first() #getting the audio for said vide
+
 
         try:
             directory = read_directory()[0] #getting the save directory
             if "." in video_title:
                 video_title = video_title.replace(".", "")
-            youtube_object1080.download(output_path=directory, filename=f"{video_title}.mp4") #downloading the 1080p video
+
+            #downloading the audio and video streams
+            print("downloading the audio and video streams...")
+            youtube_object_high_res.download(output_path=directory, filename=f"{video_title}.mp4") #downloading the 1080p video
+            print(f"downloaded {video_title} at {youtube_object_high_res.resolution}")
             youtube_object_audio.download(output_path=directory, filename=f'{video_title}.mp3') #downloading the audio file
-            print(f"{video_title} downloaded successfully at 1080p\n") #status updates
-            download_status.config(text=f"downloaded {video_title} successfully at 1080p resolution!")
+
+            print(f"{video_title} downloaded successfully at {youtube_object_high_res.resolution}\n") #status updates
+            download_status.config(text=f"downloaded {video_title} successfully at {youtube_object_high_res.resolution} resolution!")
             download_status.update()
-            merging(video_path=f'{directory}\\{video_title}.mp4', audio_path=f'{directory}\\{video_title}.mp3', video_title=video_title, output_path=f"{directory}\\{video_title} - 1080p.mp4", download_type="single") #calling the merging function
+            merging(video_path=f'{directory}\\{video_title}.mp4', audio_path=f'{directory}\\{video_title}.mp3', video_title=video_title, output_path=f"{directory}\\{video_title} - {youtube_object_high_res.resolution}.mp4", download_type="single") #calling the merging function
 
         except:
-            print("failed to download at 1080p so trying with the highest possible resolution (usually 720p)...") #failed to download 1080p meaning there was some error or the video doesn't have 1080p
+            print("failed to download at high resolution so trying with the highest possible resolution (usually 720p)...") #failed to download 1080p meaning there was some error or the video doesn't have 1080p
             try:
                 try:
                     os.remove(f'{directory}\\{video_title}.mp3')
@@ -172,6 +198,11 @@ def single_video_download(): #single video download method
                 download_status.config(text=f"there was an error while downloading {video_title}") #status updates
                 download_status.update()
 
+
+
+
+
+#playlist downloads
 def playlist_dowload():
     playlist_link = playlist_url.get()
     playlist = Playlist(playlist_link)
@@ -207,6 +238,7 @@ def playlist_dowload():
             continue
 
 
+
         # checking if ffmpeg is installed or not
         try:
             result = subprocess.run([f'{ffmpeg}', '--help'], stdout=subprocess.PIPE, stderr=subprocess.PIPE, check=True)
@@ -219,14 +251,36 @@ def playlist_dowload():
         if not ffmpeg_installed:
             print("ffmpeg is not installed. Lower resolution video will be installed instead...")
             download_720p_video(link=video.watch_url)  # downloading a 720p video instead of 1080p
+            current_video.config(text=f"{video_title} will be downloaded at lower resolutions due to the lack of ffmpeg")
+            downloaded_videos += 1
+            total_percentage += percent_per_vid
+            progress_percent.config(text=f'{total_percentage:.2f}%')
+            downloaded.config(text=f'{downloaded_videos}/{number_of_vids} downloaded')
+            downloaded.update() #updating downloaded counter on gui
+            progress_percent.update() #updating progress percent (pp) on the gui
+            progressbar.update_idletasks()
             continue
+
+
+
         else:
 
             try: #huge try except for all of this just in case heart
                 vid_link = video.watch_url
                 youtube_object = YouTube(vid_link) #same procedure as the single video downloads except it's for playlists
-                youtube_object1080 = youtube_object.streams.filter(file_extension='mp4', res='1080p',
-                                                                   only_video=True).first()  # getting 1080p video resolution
+
+                #downloading it at 1080p
+                youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p', only_video=True).first()  # getting 1440p video resolution
+                if youtube_object_high_res is None:
+                    print("failed to get 4k stream... trying 1440p")
+                    youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p', only_video=True).first()
+                    if youtube_object_high_res is None:
+                        print("failed to get 1440p stream... trying 1080p")
+                        youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p', only_video=True).first()
+                    else:
+                        print("got 1440p stream")
+                else:
+                    print("got 4k stream")
                 youtube_object_audio = youtube_object.streams.filter(file_extension='mp4',
                                                                      only_audio=True).first()  # getting the audio for said vide
                 try:
@@ -236,19 +290,19 @@ def playlist_dowload():
                     if "." in video_title: #This can cause issues if the title ends in ... as windows would just ignore and remove them but the title of the video still has it
                         video_title.replace(".", "")
                     print("downloading seperate streams...")
-                    youtube_object1080.download(output_path=directory, filename=f'{video_title}.mp4')  # downloading the 1080p video
+                    youtube_object_high_res.download(output_path=directory, filename=f'{video_title}.mp4')  # downloading the 1080p video
                     youtube_object_audio.download(output_path=directory,
                                                   filename=f'{video_title}.mp3')  # downloading the audio file
-                    print(f"{video_title} downloaded successfully at 1080p\n")  # status updates
-                    current_video.config(text=f"downloaded {video_title} successfully at 1080p resolution!")
+                    print(f"{video_title} downloaded successfully at {youtube_object_high_res.resolution}\n")  # status updates
+                    current_video.config(text=f"downloaded {video_title} successfully at {youtube_object_high_res.resolution} resolution!")
                     current_video.update()
                     print("merging the audio and video files")
                     merging(video_path=f'{directory}\\{video_title}.mp4', audio_path=f'{directory}\\{video_title}.mp3',
                             video_title=video_title,
-                            output_path=f"{directory}\\{video_title} - 1080p.mp4", download_type='playlist')  #calling the merging function
+                            output_path=f"{directory}\\{video_title} - {youtube_object_high_res.resolution}p", download_type='playlist')  #calling the merging function
 
                 except: #if it fails to download it we try to download the highest resolution it can download
-                    print("failed to download 1080p version. trying to download with the highest possible resolution (usually 720p)")
+                    print("failed to download high res version. trying to download with the highest possible resolution (usually 720p)")
                     try: #trying to download the highest resolution
                         youtube_object = youtube_object.streams.get_highest_resolution()
                         youtube_object.download(directory) #downloading video
@@ -271,6 +325,15 @@ def playlist_dowload():
             except: #some other error occured during this entire proccess
                 print(f"failed to download video {video_title}")
                 current_video.config(text=f'failed to download video "{video_title}"',bg='#0F0F0F', fg='#fafafa')
+                downloaded_videos += 1 #updating the taskbar
+                progressbar.update_idletasks()
+                total_percentage += percent_per_vid
+                progress_percent.config(text=f'{total_percentage:.2f}%')
+                downloaded.config(text=f'{downloaded_videos}/{number_of_vids} downloaded')
+                downloaded.update() #updating downloaded counter on gui
+                progress_percent.update() #updating progress percent (pp) on the gui
+                if downloaded_videos == number_of_vids:
+                    progressbar.stop() # resetting and stopping the progressbar
 
             current_video.update() #updating the window so it shows the download status
 
