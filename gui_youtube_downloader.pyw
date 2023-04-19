@@ -6,7 +6,7 @@ from tkinter import ttk
 import subprocess
 import os
 
-ffmpeg = "C:\\Downloads\\ffmpeg-6.0-full_build\\ffmpeg-6.0-full_build\\bin\\ffmpeg.exe"
+ffmpeg = "ffmpeg"
 
 def directory_change(): #directory change method
     new_directory = new_dir.get()
@@ -55,7 +55,7 @@ def merging(video_path, audio_path, video_title, output_path, download_type): #m
         subprocess.call(cmd, shell=True) #executing said command
         print("merged the video and audio file successfully") #status updates
         if download_type == "single":
-            download_status.config(text="Merged the video and audio files successfully!") # status updates
+            download_status.config(text=f"Merged the video and audio files successfully!") # status updates
             download_status.update()
         else:
             current_video.config(text="Merged the video and audio files successfully!")
@@ -86,6 +86,7 @@ def download_720p_video(link):
     except:
         try:
             youtube_object = YouTube(link) #retrying
+            print(f"{youtube_object.title}, {youtube_object.streams}")
             video_title = youtube_object.title
         except:
             video_title = "not available" #default for when there's no title.
@@ -146,31 +147,63 @@ def single_video_download(): #single video download method
 
         print(youtube_object.watch_url)
         watch_url = youtube_object.watch_url
-        youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p', only_video=True).first()#getting 2160p video resolution
-        if youtube_object_high_res is None:
+        try:
+            #trying to get 4k stream
+            youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p', only_video=True).first()#getting 2160p video resolution
+        except:
+            youtube_object_high_res = None
+
+        if youtube_object_high_res is None: #1440p
             print("failed to get 4k stream... trying 1440p") #this can be caused by the video not having 4k to begin with or... well youtube being weird and pytube being inconsistent
-            youtube_object = YouTube(watch_url)
-            youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p', only_video=True).first()
-            if youtube_object_high_res is None:
-                print("failed to get 1440p stream... trying 1080p") #same as 4k
+            try:
                 youtube_object = YouTube(watch_url)
-                youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p', only_video=True).first() #no real way to notify someone if the file is being downloaded
+                youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p', only_video=True).first()
+            except:
+                print("couldn't get 1440p")
+                youtube_object_high_res = None
+
+            if youtube_object_high_res is None: #1080p
+                print("failed to get 1440p stream... trying 1080p") #same as 4k
+                try:
+                    youtube_object = YouTube(watch_url)
+                    youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p', only_video=True).first() #no real way to notify someone if the file is being downloaded
+                except:
+                    try:
+                        print("Couldn't get stream. Trying again...")
+                        youtube_object = YouTube(watch_url)
+                        youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p',
+                                                                            only_video=True).first()  # no real way to notify someone if the file is being downloaded
+                    except:
+                        print("couldn't get 1080p video")
             else:
                 print("got 1440p stream")
         else:
             print("got 4k stream")
 
+        print("got higher resolution. Downloading audio...")
         youtube_object_audio = youtube_object.streams.filter(file_extension='mp4', only_audio=True).first() #getting the audio for said vide
-
+        print("got audio stream")
 
         try:
             directory = read_directory()[0] #getting the save directory
+
+            #replacing all "problematic" characters
             if "." in video_title:
                 video_title = video_title.replace(".", "")
+            elif "|" in video_title:
+                video_title = video_title.replace("|", "")
+            elif "\"" in video_title:
+                video_title = video_title.replace("\"", "")
+            elif "?" in video_title:
+                video_title = video_title.replace("?", "")
+            elif ":" in video_title:
+                video_title = video_title.replace(":", "")
+
 
             #downloading the audio and video streams
             print("downloading the audio and video streams...")
-            youtube_object_high_res.download(output_path=directory, filename=f"{video_title}.mp4") #downloading the 1080p video
+            print("downloading the video...")
+            youtube_object_high_res.download(output_path=directory, filename=f"{video_title}.mp4") #downloading the high res video
             print(f"downloaded {video_title} at {youtube_object_high_res.resolution}")
             youtube_object_audio.download(output_path=directory, filename=f'{video_title}.mp3') #downloading the audio file
 
@@ -265,25 +298,44 @@ def playlist_dowload():
 
         else:
 
-            try: #huge try except for all of this just in case heart
+            try:  # huge try except for all of this just in case heart
                 vid_link = video.watch_url
-                youtube_object = YouTube(vid_link) #same procedure as the single video downloads except it's for playlists
+                youtube_object = YouTube(
+                    vid_link)  # same procedure as the single video downloads except it's for playlists
 
-                #downloading it at 1080p
-                youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p', only_video=True).first()  # getting 1440p video resolution
+                # downloading it at 1080p
+                youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p',
+                                                                        only_video=True).first()  # getting 1440p video resolution
                 if youtube_object_high_res is None:
                     print("failed to get 4k stream... trying 1440p")
-                    youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p', only_video=True).first()
+                    youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p',
+                                                                            only_video=True).first()
                     if youtube_object_high_res is None:
                         print("failed to get 1440p stream... trying 1080p")
-                        youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p', only_video=True).first()
+                        youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p',
+                                                                                only_video=True).first()
                     else:
                         print("got 1440p stream")
                 else:
                     print("got 4k stream")
                 youtube_object_audio = youtube_object.streams.filter(file_extension='mp4',
-                                                                     only_audio=True).first()  # getting the audio for said vide
+                                                                     only_audio=True).first()  # getting the audio for said video
+
                 try:
+
+                    # replacing all "problematic" characters
+                    if "." in video_title:
+                        video_title = video_title.replace(".", "")
+                    elif "|" in video_title:
+                        video_title = video_title.replace("|", "")
+                    elif "\"" in video_title:
+                        video_title = video_title.replace("\"", "")
+                    elif "?" in video_title:
+                        video_title = video_title.replace("?", "")
+                    elif ":" in video_title:
+                        video_title = video_title.replace(":", "")
+
+
                     current_video.config(text=f"Downloading {video_title}...")
                     directory = read_directory()[0]  # getting the save directory
                     print("checking if the title is valid...")
