@@ -198,7 +198,16 @@ def single_video_download(): #single video download method
                 video_title = video_title.replace("?", "")
             elif ":" in video_title:
                 video_title = video_title.replace(":", "")
-
+            elif "/" in video_title:
+                video_title = video_title.replace("/", "")
+            elif "\\" in video_title:
+                video_title = video_title.replace("\\", "")
+            elif "<" in video_title:
+                video_title = video_title.replace("<", "")
+            elif ">" in video_title:
+                video_title = video_title.replace(">", "")
+            elif "*" in video_title:
+                video_title = video_title.replace("*", "")
 
             #downloading the audio and video streams
             print("downloading the audio and video streams...")
@@ -334,6 +343,16 @@ def playlist_dowload():
                         video_title = video_title.replace("?", "")
                     elif ":" in video_title:
                         video_title = video_title.replace(":", "")
+                    elif "/" in video_title:
+                        video_title = video_title.replace("/", "")
+                    elif "\\" in video_title:
+                        video_title = video_title.replace("\\", "")
+                    elif "<" in video_title:
+                        video_title = video_title.replace("<", "")
+                    elif ">" in video_title:
+                        video_title = video_title.replace(">", "")
+                    elif "*" in video_title:
+                        video_title = video_title.replace("*", "")
 
 
                     current_video.config(text=f"Downloading {video_title}...")
