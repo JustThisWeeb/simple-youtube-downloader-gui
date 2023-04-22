@@ -31,6 +31,7 @@ py -m pip install pytube
 
 ffmpeg - 
 64-bit: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full.7z
+
 32-bit: https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-full-32bit-static.7z
 
 1. Open the Start menu and search for "Environment Variables".
