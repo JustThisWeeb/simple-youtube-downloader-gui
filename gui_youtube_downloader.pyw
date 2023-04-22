@@ -3,6 +3,7 @@ from pytube import Playlist
 from tkinter import *
 from tkinter import messagebox
 from tkinter import ttk
+from threading import Thread
 import subprocess
 import os
 
@@ -39,6 +40,19 @@ def read_directory(): #reading the contents of the save_directory file
         new_dir.place(x=10, y=50)
         Button(win, text="Change dir", command=directory_change).place(x=120, y=75)
         win.mainloop()
+
+
+
+ # using multithreading because otherwise tkinter would freeze for as long as there's another task on the same thread running.
+ # apparently it likes the thread it uses to just be its own private thread
+def single_video_threading():
+    single_video_thread = Thread(target=single_video_download)
+    single_video_thread.start()
+
+def playlist_threading():
+    playlist_thread = Thread(target=playlist_dowload)
+    playlist_thread.start()
+
 
 
 def merging(video_path, audio_path, video_title, output_path, download_type): #merging the video and audio files and deleting them after creating a new merged file - download type is to know from which function merging got called.
@@ -145,8 +159,7 @@ def single_video_download(): #single video download method
 
     else:
 
-        print(youtube_object.watch_url)
-        watch_url = youtube_object.watch_url
+        print(link)
         try:
             #trying to get 4k stream
             youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p', only_video=True).first()#getting 2160p video resolution
@@ -156,7 +169,7 @@ def single_video_download(): #single video download method
         if youtube_object_high_res is None: #1440p
             print("failed to get 4k stream... trying 1440p") #this can be caused by the video not having 4k to begin with or... well youtube being weird and pytube being inconsistent
             try:
-                youtube_object = YouTube(watch_url)
+                youtube_object = YouTube(link)
                 youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p', only_video=True).first()
             except:
                 print("couldn't get 1440p")
@@ -165,16 +178,18 @@ def single_video_download(): #single video download method
             if youtube_object_high_res is None: #1080p
                 print("failed to get 1440p stream... trying 1080p") #same as 4k
                 try:
-                    youtube_object = YouTube(watch_url)
+                    youtube_object = YouTube(link)
                     youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p', only_video=True).first() #no real way to notify someone if the file is being downloaded
                 except:
                     try:
                         print("Couldn't get stream. Trying again...")
-                        youtube_object = YouTube(watch_url)
+                        youtube_object = YouTube(link)
                         youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p',
                                                                             only_video=True).first()  # no real way to notify someone if the file is being downloaded
                     except:
                         print("couldn't get 1080p video")
+                        download_720p_video(link=link)
+
             else:
                 print("got 1440p stream")
         else:
@@ -421,7 +436,7 @@ Label(root, text="Youtube Downloader",bg='#0F0F0F',fg='#fafafa' , font='italic 1
 Label(root, text = "Download a single video: ",bg='#0F0F0F',fg='#fafafa', font="italic 10").place(x=37, y=72) #label
 url = Entry(root, width=60) #creating entry box
 url.place(x=185, y=72) #fixed position (would look worse the higher the resolution of the monitor gets)
-Button(root, text="Download",bg='#267cc7', command=single_video_download).place(x=555, y=67) #creating the button using random color as background color
+Button(root, text="Download",bg='#267cc7', command=single_video_threading).place(x=555, y=67) #creating the button using random color as background color
 download_status = Label(root, text="", bg='#0f0f0f', fg="#fafafa", font='italic 10')
 download_status.place(x=185, y=92) #decided to also add download status for single video downloads
 
@@ -430,7 +445,7 @@ download_status.place(x=185, y=92) #decided to also add download status for sing
 Label(root, text = "Download a playlist: ",bg='#0F0F0F',fg='#fafafa', font="italic 10").place(x=37, y=150)
 playlist_url = Entry(root, width=60)
 playlist_url.place(x=185, y=150)
-Button(root, text="Download", bg='#267cc7', command=playlist_dowload).place(x = 555, y = 145)
+Button(root, text="Download", bg='#267cc7', command=playlist_threading).place(x = 555, y = 145)
 current_video = Label(root, text='',bg='#0F0F0F', fg='#fafafa', font='italic 10') # not quite sure if I should delete that
 current_video.place(x=185, y=170)
 
