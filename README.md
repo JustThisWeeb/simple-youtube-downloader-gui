@@ -2,7 +2,7 @@
 As the same would suggest this is a simple youtube downloader with a gui. 
 I essentially just reused the code from my other repository with the same name if you exclude the gui part.
 
-now it's not really perfect but I did also make it in just a few hours while learning about tkinter. I had an issue with the window becoming unresponsive when downloading a playlist and if you actually spam it it will crash. Not sure if the issue will get replicated on your end. 
+now it's not really perfect but I did also make it in just a few hours while learning about tkinter. 
 
 One note I'd like to make is that I actually replaced the original .py file with a .pyw file which only really prevents the command prompt from opening up.
 
@@ -50,3 +50,5 @@ ffmpeg -
 
 4. It got a 1080p video stream but didn't download the video. This is probably an issue with how I do things. You see when downloading the video I use the video title as a file name which means that if a video has some more "special" characters that windows doesn't allow in file names it will give an error when downloading the high resolution video. Then as an exception is raised it would simply revert to the highest resolution it can get and download which would normally be 720p (both higher and lower resolutions are possible). I have somewhat fixed the issue via just replacing the most common special characters I see in youtube titles.
 
+# dev log I guess?
+22/4/23 - added multithreading and fixed the crashing issue 
