@@ -1,3 +1,20 @@
+# NO LONGER WORKS!
+The origianl file of simple-youtube-downloader-gui.pyw no longer works because of a bug in pytube. I will still leave it here in case it gets fixed in the future. For now I've made a new file using a different library (that's also much newer being younger than this repository). If you want to download videos using this ui (for some reason) you are free to download the new file and test it out. 
+
+# Requirements: 
+- now yt-dlp is required instead of pytube for the new file. 
+install it with py -m pip install yt-dlp in the cmd
+- ffmpeg. The yt-dlp library uses ffmpeg to format the videos to mp4 so now it's actually a bigger requirement than in the old file that uses pytube. 
+
+# Important
+if pytube starts working again (I somewhat doubt it as the repository hasn't been updated in a long time and the issue is with youtube changing their api) I will probably make a new repository just for the new file. Currently you could still make pytube work but the download speed becomes unbearably slow at less than 1 mbps which simply isn't enough to download youtube videos in higher resolution. Not to mention it would still give out that 'streamingData' key error. I've personally "participated" in the discussions on the issue in the repo page but didn't really contribute much. Currently there are 2 fixes one of which doesn't work for me and the other works but as noted by me and several others the download speed gets a really huge reduction that most would just not deal with (me included). 
+There are also a lot of people that got to know of the yt-dlp library which seems to have been made specifically because of those pytube issues. 
+
+# Funnily enough
+Because yt-dlp is a fork of youtube-dl it can download videos from sites other than youtube. For example you can download videos from twitter, facebook, reddit etc. 
+Here's the link to the list of supported sites - https://github.com/ytdl-org/youtube-dl/blob/master/docs/supportedsites.md 
+=== Note that over half of them probably won't work. yt-dlp only fixed the youtube download option as far as I'm aware.
+
 # simple-youtube-downloader-gui
 As the same would suggest this is a simple youtube downloader with a gui. 
 I essentially just reused the code from my other repository with the same name if you exclude the gui part.
@@ -53,3 +70,4 @@ ffmpeg -
 
 # dev log I guess?
 22/4/23 - added multithreading and fixed the crashing issue 
+28/4/23 - Really big changes related to a pytube bug I've been following for a few days (since around the 25th)
