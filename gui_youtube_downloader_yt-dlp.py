@@ -88,10 +88,22 @@ def single_video_download(): #single video download method
         download_status.update()
         print(link)
 
+        resolution = clicked.get() #getting the resolution
+        print(resolution)
+
+        subtitles = False #subtitles are off by default so this is also off by default
+        subtitle_option = sub_clicked.get() #getting subtitle choice
+        print(subtitle_option) #printing it for debug purposes
+        if subtitle_option == "yes":
+            subtitles = True
+
         #setting yt-dlp options
         ydl_options = {
-            'format': 'bestvideo[height>=1080][ext=mp4]+bestaudio[ext=m4a]/mp4', #video with a resolution of at least 1080p
-            'outtmpl': f'{directory}\\{video_title}.mp4', #output folder and name
+            'format': f'bestvideo[height<={resolution}][ext=mp4]+bestaudio[ext=m4a]/mp4', #video with a resolution of at least 1080p
+            'subtitlesformat': 'vtt', # Specify the subtitles format
+            'writeautomaticsub': subtitles, # Download auto-generated subtitles
+            'writesubtitles': subtitles, # Download subtitles
+            'outtmpl': f'{directory}\\{video_title} - {resolution}p.mp4', #output folder and name
             'merge_output_format': 'mp4', #the key name speaks for itself
             'postprocessors': [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}] #it does require ffmpeg to work.
         }
@@ -173,16 +185,30 @@ def playlist_dowload():
                     video_title = video_title.replace(">", "")
                 elif "*" in video_title:
                     video_title = video_title.replace("*", "")
-
                 #status update
                 current_video.config(text=f"Downloading {video_title}...")
 
-                # setting up the yt-dlp options
+
+                resolution = clicked.get()  # getting the resolution
+                print(resolution)
+
+                subtitles = False
+                subtitle_option = sub_clicked.get()
+                print(subtitle_option)
+                if subtitle_option == "yes":
+                    subtitles = True
+
+                # setting yt-dlp options
                 ydl_options = {
-                    'format': 'bestvideo[height>=1080][ext=mp4]+bestaudio[ext=m4a]/mp4',
-                    'outtmpl': f'{directory}\\{video_title}.mp4',
-                    'merge_output_format': 'mp4',
+                    'format': f'bestvideo[height<={resolution}][ext=mp4]+bestaudio[ext=m4a]/mp4',
+                    # video with a resolution of at least 1080p
+                    'subtitlesformat': 'vtt',  # Specify the subtitles format
+                    'writeautomaticsub': subtitles,  # Download auto-generated subtitles
+                    'writesubtitles': subtitles,  # Download subtitles
+                    'outtmpl': f'{directory}\\{video_title} - {resolution}p.mp4',  # output folder and name
+                    'merge_output_format': 'mp4',  # the key name speaks for itself
                     'postprocessors': [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}]
+                    # it does require ffmpeg to work.
                 }
 
                 # Downloading the video
@@ -235,6 +261,33 @@ url.place(x=185, y=72) #fixed position (would look worse the higher the resoluti
 Button(root, text="Download",bg='#267cc7', command=single_video_threading).place(x=555, y=67) #creating the button using random color as background color
 download_status = Label(root, text="", bg='#0f0f0f', fg="#fafafa", font='italic 10')
 download_status.place(x=185, y=92) #decided to also add download status for single video downloads
+
+# resolutions drop menu
+resolution_options = [
+    "144",
+    "240",
+    "360",
+    "480",
+    "720",
+    "1080",
+    "1440",
+    "2160",
+    "4320"
+]
+clicked = StringVar()
+clicked.set("1080")
+drop = OptionMenu(root, clicked, *resolution_options)
+drop.place(x=625, y=65)
+drop.config(bg='#0F0F0F', fg='#fafafa', font="italic 10")
+
+#yes or no for subtitles
+Label(root, text = "Do you want to also download subtitle file?", bg='#0F0F0F',fg='#fafafa', font="italic 10", ).place(x=700, y=35)
+sub_options = ["yes", "no"]
+sub_clicked = StringVar()
+sub_clicked.set("no")
+sub_drop = OptionMenu(root, sub_clicked, *sub_options)
+sub_drop.place(x=800, y=65)
+sub_drop.config(bg='#0F0F0F', fg='#fafafa', font="italic 10")
 
 
 #Downloading a playlist
