@@ -37,6 +37,8 @@ if you do have ffmpeg installed and the videos get downloaded in lower resolutio
 
 # future plans 
 - Fixing the progressbar (again)
+- integrating the new features to the old file with pytube
+- adding a setup file that automatically does just about everything setup related. I've already mostly done that but there's a slight issue related to adding ffmpeg to path. It can download it and if you have 7zip installed it can also decompress it. The only real issue is getting it added to path which doesn't really seem to work for some reason. I will add the file tomorrow and if it works it works and if it doesn't I will fix it later. 
 
 
 # Requirements:
