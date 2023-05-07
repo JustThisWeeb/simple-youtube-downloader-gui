@@ -7,7 +7,7 @@ from threading import Thread
 import subprocess
 import os
 
-ffmpeg = "C:\\Downloads\\ffmpeg-6.0-full_build\\ffmpeg-6.0-full_build\\bin\\ffmpeg.exe"
+ffmpeg = "ffmpeg"
 
 def directory_change(): #directory change method
     new_directory = new_dir.get()
