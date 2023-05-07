@@ -71,6 +71,8 @@ ffmpeg -
 4. It got a 1080p video stream but didn't download the video. This is probably an issue with how I do things. You see when downloading the video I use the video title as a file name which means that if a video has some more "special" characters that windows doesn't allow in file names it will give an error when downloading the high resolution video. Then as an exception is raised it would simply revert to the highest resolution it can get and download which would normally be 720p (both higher and lower resolutions are possible). I have somewhat fixed the issue via just replacing the most common special characters I see in youtube titles.
 
 # dev log I guess?
-22/4/23 - added multithreading and fixed the crashing issue 
+22/4/23 - added multithreading and fixed the crashing issue
+
 28/4/23 - Really big changes related to a pytube bug I've been following for a few days (since around the 25th)
+
 07/5/23 - pytube got patched but I have already added a few QoL features to the new file that uses yt-dlp so I will try integrating them with pytube. I will keep updating both files.
