@@ -1,14 +1,14 @@
-# NO LONGER WORKS!
-The origianl file of simple-youtube-downloader-gui.pyw no longer works because of a bug in pytube. I will still leave it here in case it gets fixed in the future. For now I've made a new file using a different library (that's also much newer being younger than this repository). If you want to download videos using this ui (for some reason) you are free to download the new file and test it out. 
+# Important
+It would seem that pytube has started working again but I will keep using yt-dlp for future updates because there are a lot of nice features and it uses ffmpeg to automatically merge videos for me. Not only that but it also gives a nice progressbar for the video downloads. There are some issues I've encountered with it but the same goes for pytube. 
+I will probably try to integrate some of the updates of the new files with pytube and will still continue working with both files but my main focus going forward is going to be related to yt-dlp. 
+
 
 # Requirements: 
 - now yt-dlp is required instead of pytube for the new file. 
 install it with py -m pip install yt-dlp in the cmd
 - ffmpeg. The yt-dlp library uses ffmpeg to format the videos to mp4 so now it's actually a bigger requirement than in the old file that uses pytube. 
 
-# Important
-if pytube starts working again (I somewhat doubt it as the repository hasn't been updated in a long time and the issue is with youtube changing their api) I will probably make a new repository just for the new file. Currently you could still make pytube work but the download speed becomes unbearably slow at less than 1 mbps which simply isn't enough to download youtube videos in higher resolution. Not to mention it would still give out that 'streamingData' key error. I've personally "participated" in the discussions on the issue in the repo page but didn't really contribute much. Currently there are 2 fixes one of which doesn't work for me and the other works but as noted by me and several others the download speed gets a really huge reduction that most would just not deal with (me included). 
-There are also a lot of people that got to know of the yt-dlp library which seems to have been made specifically because of those pytube issues. 
+
 
 # Funnily enough
 Because yt-dlp is a fork of youtube-dl it can download videos from sites other than youtube. For example you can download videos from twitter, facebook, reddit etc. 
