@@ -38,6 +38,22 @@ def read_directory(): #reading the contents of the save_directory file
 
 
 
+# creating ffmpeg install thread
+def ffmpeg_install_threading():
+    ffmpeg_thread = Thread(target=ffmpeg_install)
+    ffmpeg_thread.start()
+
+# ffmpeg install
+def ffmpeg_install():
+    try:
+        current_directory = read_directory()[0] #we get the current directory
+        ffmpeg_directory = current_directory + "\\ffmpeg - 6.0 - full_build\\ffmpeg - 6.0 - full_build\\bin"
+        os.environ['PATH'] += f'{ffmpeg_directory}'
+        print('added succeffully')
+    except:
+        print("couldn't install ffmpeg properly")
+
+
 
  # using multithreading because otherwise tkinter would freeze for as long as there's another task on the same thread running.
  # apparently it likes the thread it uses to just be its own private thread
@@ -97,16 +113,32 @@ def single_video_download(): #single video download method
         if subtitle_option == "yes":
             subtitles = True
 
-        #setting yt-dlp options
-        ydl_options = {
-            'format': f'bestvideo[height<={resolution}][ext=mp4]+bestaudio[ext=m4a]/mp4', #video with a resolution of at least 1080p
-            'subtitlesformat': 'vtt', # Specify the subtitles format
-            'writeautomaticsub': subtitles, # Download auto-generated subtitles
-            'writesubtitles': subtitles, # Download subtitles
-            'outtmpl': f'{directory}\\{video_title} - {resolution}p.mp4', #output folder and name
-            'merge_output_format': 'mp4', #the key name speaks for itself
-            'postprocessors': [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}] #it does require ffmpeg to work.
-        }
+        audio_only = False #audio only download is off by default
+        audio_only_option = audio_only_choice.get() #getting the dropdown menu choice (no by default)
+        if audio_only_option == "yes":
+            audio_only = True
+
+        if not audio_only:
+            #setting yt-dlp options
+            ydl_options = {
+                'format': f'bestvideo[height<={resolution}][ext=mp4]+bestaudio[ext=m4a]/mp4', #video with a resolution of at least 1080p
+                'subtitlesformat': 'vtt', # Specify the subtitles format
+                'writeautomaticsub': subtitles, # Download auto-generated subtitles
+                'writesubtitles': subtitles, # Download subtitles
+                'outtmpl': f'{directory}\\{video_title} - {resolution}p.mp4', #output folder and name
+                'merge_output_format': 'mp4', #the key name speaks for itself
+                'postprocessors': [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}] #it does require ffmpeg to work.
+            }
+        else:
+            ydl_options = {
+                    'format': 'bestaudio/best',
+                    'outtmpl': f'{directory}\\{video_title} - {resolution}p.mp3',
+                    'postprocessors': [{
+                        'key': 'FFmpegExtractAudio',
+                        'preferredcodec': 'mp3',
+                        'preferredquality': f'{resolution}'
+                    }]
+                }
 
         with yt_dlp.YoutubeDL(ydl_options) as ydl:
             ydl.download([f'{link}']) #downloading the video
@@ -198,18 +230,36 @@ def playlist_dowload():
                 if subtitle_option == "yes":
                     subtitles = True
 
-                # setting yt-dlp options
-                ydl_options = {
-                    'format': f'bestvideo[height<={resolution}][ext=mp4]+bestaudio[ext=m4a]/mp4',
-                    # video with a resolution of at least 1080p
-                    'subtitlesformat': 'vtt',  # Specify the subtitles format
-                    'writeautomaticsub': subtitles,  # Download auto-generated subtitles
-                    'writesubtitles': subtitles,  # Download subtitles
-                    'outtmpl': f'{directory}\\{video_title} - {resolution}p.mp4',  # output folder and name
-                    'merge_output_format': 'mp4',  # the key name speaks for itself
-                    'postprocessors': [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}]
-                    # it does require ffmpeg to work.
-                }
+                audio_only = False  # audio only download is off by default
+                audio_only_option = audio_only_choice.get()  # getting the dropdown menu choice (no by default)
+                if audio_only_option == "yes":
+                    audio_only = True
+
+                if not audio_only:
+                    # setting yt-dlp options
+                    ydl_options = {
+                        'format': f'bestvideo[height<={resolution}][ext=mp4]+bestaudio[ext=m4a]/mp4',
+                        # video with a resolution of at least 1080p
+                        'subtitlesformat': 'vtt',  # Specify the subtitles format
+                        'writeautomaticsub': subtitles,  # Download auto-generated subtitles
+                        'writesubtitles': subtitles,  # Download subtitles
+                        'outtmpl': f'{directory}\\{video_title} - {resolution}p.mp4',  # output folder and name
+                        'merge_output_format': 'mp4',  # the key name speaks for itself
+                        'postprocessors': [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}]
+                        # it does require ffmpeg to work.
+                    }
+                else:
+                    quality = quality_choice.get()
+                    print(quality)
+                    ydl_options = {
+                        'format': 'bestaudio/best',
+                        'outtmpl': f'{directory}\\{video_title} - {quality}kbps',
+                        'postprocessors': [{
+                            'key': 'FFmpegExtractAudio',
+                            'preferredcodec': 'mp3',
+                            'preferredquality': f'{quality}'
+                        }]
+                    }
 
                 # Downloading the video
                 with yt_dlp.YoutubeDL(ydl_options) as ydl:
@@ -251,7 +301,8 @@ root.frame() #creating the frame so it could be fullscreened
 root.geometry('1053x450')#decided this is an optimal resolution
 root.config(bg='#0F0F0F') #setting the background color to the youtube dark mode one
 root.title("Youtube Downloader by jtw") #window title
-root.iconphoto(False, PhotoImage(file= f"{os.getcwd()}\\yt_icon.ico")) #changing the icon of the window to that of youtube
+if "yt_icon.ico" in os.listdir(os.getcwd()):
+    root.iconphoto(False, PhotoImage(file= f"yt_icon.ico")) #changing the icon of the window to that of
 Label(root, text="Youtube Downloader",bg='#0F0F0F',fg='#fafafa' , font='italic 15 bold').pack(pady=10) #first title label
 
 #Downloadng a single video
@@ -274,6 +325,18 @@ resolution_options = [
     "2160",
     "4320"
 ]
+
+quality_options = [
+    "128",
+    "192",
+    '256'
+]
+quality_choice = StringVar()
+quality_choice.set('128')
+quality_drop = OptionMenu(root, quality_choice, *quality_options)
+quality_drop.config(bg='#0F0F0F', fg='#fafafa', font="italic 10")
+quality_drop.place(x=865, y=140)
+
 clicked = StringVar()
 clicked.set("1080")
 drop = OptionMenu(root, clicked, *resolution_options)
@@ -289,6 +352,14 @@ sub_drop = OptionMenu(root, sub_clicked, *sub_options)
 sub_drop.place(x=800, y=65)
 sub_drop.config(bg='#0F0F0F', fg='#fafafa', font="italic 10")
 
+# yes or no for audio only download
+audio_only_choices = ['yes', 'no']
+audio_only_choice = StringVar()
+audio_only_choice.set("no")
+audio_only_drop = OptionMenu(root, audio_only_choice, *audio_only_choices)
+Label(root, text= "Do you want to download audio only?", bg="#0f0f0f", fg="#fafafa", font="italic 10").place(x=710, y=110)
+audio_only_drop.place(x=800, y=140)
+audio_only_drop.config(bg='#0F0F0F', fg='#fafafa', font="italic 10")
 
 #Downloading a playlist
 Label(root, text = "Download a playlist: ",bg='#0F0F0F',fg='#fafafa', font="italic 10").place(x=37, y=150)
@@ -312,6 +383,8 @@ Label(root, text="Change or add directory",bg='#0F0F0F', fg='#fafafa' ,font='ita
 new_dir = Entry(root, width=48)
 new_dir.place(x=400, y=325)
 Button(root, text="Change dir",bg='#267cc7', command=directory_change).place(x=500, y= 350)
+Button(root, text="install ffmpeg",bg='#267cc7', command=ffmpeg_install_threading).place(x=600, y= 350)
+
 
 Button(root, text = "QUIT", width=10, height=1, bg='RED', fg='#fafafa', command=root.destroy).place(relx= .9, rely=.9, anchor=CENTER)
 root.mainloop() #executing tkinter object
