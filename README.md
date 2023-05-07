@@ -73,3 +73,4 @@ ffmpeg -
 # dev log I guess?
 22/4/23 - added multithreading and fixed the crashing issue 
 28/4/23 - Really big changes related to a pytube bug I've been following for a few days (since around the 25th)
+07/5/23 - pytube got patched but I have already added a few QoL features to the new file that uses yt-dlp so I will try integrating them with pytube. I will keep updating both files.
