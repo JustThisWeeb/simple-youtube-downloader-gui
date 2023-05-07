@@ -7,7 +7,7 @@ from threading import Thread
 import subprocess
 import os
 
-ffmpeg = "ffmpeg"
+ffmpeg = "C:\\Downloads\\ffmpeg-6.0-full_build\\ffmpeg-6.0-full_build\\bin\\ffmpeg.exe"
 
 def directory_change(): #directory change method
     new_directory = new_dir.get()
@@ -224,6 +224,7 @@ def single_video_download(): #single video download method
             elif "*" in video_title:
                 video_title = video_title.replace("*", "")
 
+
             #downloading the audio and video streams
             print("downloading the audio and video streams...")
             print("downloading the video...")
@@ -280,7 +281,7 @@ def playlist_dowload():
 
         print(f"Downloading {video_title}...")
 
-        if f"{video_title}.mp4" in os.listdir(read_directory()[0]): #seeing if the video has already been downloaded
+        if f"{video_title} - 1080p.mp4" in os.listdir(read_directory()[0]) or f"{video_title} - 1440p.mp4" in os.listdir(read_directory()[0]) or f"{video_title} - 2160p.mp4" in os.listdir(read_directory()[0]): #seeing if the video has already been downloaded
             print("file already downloaded\n")
             current_video.config(text=f"{video_title} already downloaded")
             downloaded_videos += 1
