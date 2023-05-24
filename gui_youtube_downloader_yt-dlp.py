@@ -45,13 +45,10 @@ def ffmpeg_install_threading():
 
 # ffmpeg install
 def ffmpeg_install():
-    try:
-        current_directory = read_directory()[0] #we get the current directory
-        ffmpeg_directory = current_directory + "\\ffmpeg - 6.0 - full_build\\ffmpeg - 6.0 - full_build\\bin"
-        os.environ['PATH'] += f'{ffmpeg_directory}'
-        print('added succeffully')
-    except:
-        print("couldn't install ffmpeg properly")
+    ...
+    #not yet implemented.
+    #setup.py file does work to an extent though
+
 
 
 
@@ -130,13 +127,15 @@ def single_video_download(): #single video download method
                 'postprocessors': [{'key': 'FFmpegVideoConvertor', 'preferedformat': 'mp4'}] #it does require ffmpeg to work.
             }
         else:
+            quality = quality_choice.get()
+            print(quality)
             ydl_options = {
                     'format': 'bestaudio/best',
-                    'outtmpl': f'{directory}\\{video_title} - {resolution}p.mp3',
+                    'outtmpl': f'{directory}\\{video_title} - {quality}kbps',
                     'postprocessors': [{
                         'key': 'FFmpegExtractAudio',
                         'preferredcodec': 'mp3',
-                        'preferredquality': f'{resolution}'
+                        'preferredquality': f'{quality}'
                     }]
                 }
 
@@ -252,14 +251,14 @@ def playlist_dowload():
                     quality = quality_choice.get()
                     print(quality)
                     ydl_options = {
-                        'format': 'bestaudio/best',
-                        'outtmpl': f'{directory}\\{video_title} - {quality}kbps',
-                        'postprocessors': [{
-                            'key': 'FFmpegExtractAudio',
-                            'preferredcodec': 'mp3',
-                            'preferredquality': f'{quality}'
-                        }]
-                    }
+                            'format': 'bestaudio/best',
+                            'outtmpl': f'{directory}\\{video_title} - {quality}kbps',
+                            'postprocessors': [{
+                                'key': 'FFmpegExtractAudio',
+                                'preferredcodec': 'mp3',
+                                'preferredquality': f'{quality}'
+                            }]
+                        }
 
                 # Downloading the video
                 with yt_dlp.YoutubeDL(ydl_options) as ydl:
@@ -357,6 +356,7 @@ audio_only_choices = ['yes', 'no']
 audio_only_choice = StringVar()
 audio_only_choice.set("no")
 audio_only_drop = OptionMenu(root, audio_only_choice, *audio_only_choices)
+
 Label(root, text= "Do you want to download audio only?", bg="#0f0f0f", fg="#fafafa", font="italic 10").place(x=710, y=110)
 audio_only_drop.place(x=800, y=140)
 audio_only_drop.config(bg='#0F0F0F', fg='#fafafa', font="italic 10")
@@ -383,7 +383,7 @@ Label(root, text="Change or add directory",bg='#0F0F0F', fg='#fafafa' ,font='ita
 new_dir = Entry(root, width=48)
 new_dir.place(x=400, y=325)
 Button(root, text="Change dir",bg='#267cc7', command=directory_change).place(x=500, y= 350)
-Button(root, text="install ffmpeg",bg='#267cc7', command=ffmpeg_install_threading).place(x=600, y= 350)
+# Button(root, text="install ffmpeg",bg='#267cc7', command=ffmpeg_install_threading).place(x=600, y= 350)
 
 
 Button(root, text = "QUIT", width=10, height=1, bg='RED', fg='#fafafa', command=root.destroy).place(relx= .9, rely=.9, anchor=CENTER)

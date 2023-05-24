@@ -160,43 +160,59 @@ def single_video_download(): #single video download method
     else:
 
         print(link)
-        try:
-            #trying to get 4k stream
-            youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p', only_video=True).first()#getting 2160p video resolution
-        except:
-            youtube_object_high_res = None
-
-        if youtube_object_high_res is None: #1440p
-            print("failed to get 4k stream... trying 1440p") #this can be caused by the video not having 4k to begin with or... well youtube being weird and pytube being inconsistent
-            try:
-                youtube_object = YouTube(link)
-                youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p', only_video=True).first()
-            except:
-                print("couldn't get 1440p")
-                youtube_object_high_res = None
-
-            if youtube_object_high_res is None: #1080p
-                print("failed to get 1440p stream... trying 1080p") #same as 4k
-                try:
+        # try:
+        #     #trying to get 4k stream
+        #     youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p', only_video=True).first()#getting 2160p video resolution
+        # except:
+        #     youtube_object_high_res = None
+        #
+        # if youtube_object_high_res is None: #1440p
+        #     print("failed to get 4k stream... trying 1440p") #this can be caused by the video not having 4k to begin with or... well youtube being weird and pytube being inconsistent
+        #     try:
+        #         youtube_object = YouTube(link)
+        #         youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p', only_video=True).first()
+        #     except:
+        #         print("couldn't get 1440p")
+        #         youtube_object_high_res = None
+        #
+        #     if youtube_object_high_res is None: #1080p
+        #         print("failed to get 1440p stream... trying 1080p") #same as 4k
+        #         try:
+        #             youtube_object = YouTube(link)
+        #             youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p', only_video=True).first() #no real way to notify someone if the file is being downloaded
+        #         except:
+        #             try:
+        #                 print("Couldn't get stream. Trying again...")
+        #                 youtube_object = YouTube(link)
+        #                 youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p',
+        #                                                                     only_video=True).first()  # no real way to notify someone if the file is being downloaded
+        #             except:
+        #                 print("couldn't get 1080p video")
+        #                 download_720p_video(link=link)
+        #
+        #     else:
+        #         print("got 1440p stream")
+        # else:
+        #     print("got 4k stream")
+        if audio_only_choice.get() == "no":
+            resolution = clicked.get()
+            youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res=resolution,
+                                                                    only_video=True).first()
+            if youtube_object_high_res is None:
+                for i in range(4):
                     youtube_object = YouTube(link)
-                    youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p', only_video=True).first() #no real way to notify someone if the file is being downloaded
-                except:
-                    try:
-                        print("Couldn't get stream. Trying again...")
-                        youtube_object = YouTube(link)
-                        youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p',
-                                                                            only_video=True).first()  # no real way to notify someone if the file is being downloaded
-                    except:
-                        print("couldn't get 1080p video")
-                        download_720p_video(link=link)
-
+                    youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res=resolution,
+                                                                            only_video=True).first()
+                    if youtube_object_high_res is not None:
+                        print("got higher resolution. Downloading audio...")
+                        break
+                    else:
+                        print("couldn't get youtube object.")
             else:
-                print("got 1440p stream")
-        else:
-            print("got 4k stream")
+                print("got higher resolution. Downloading audio...")
 
-        print("got higher resolution. Downloading audio...")
-        youtube_object_audio = youtube_object.streams.filter(file_extension='mp4', only_audio=True).first() #getting the audio for said vide
+
+        youtube_object_audio = youtube_object.streams.filter(file_extension='mp4', only_audio=True).first() #getting the audio for said video
         print("got audio stream")
 
         try:
@@ -328,24 +344,27 @@ def playlist_dowload():
                 youtube_object = YouTube(
                     vid_link)  # same procedure as the single video downloads except it's for playlists
 
-                # downloading it at 1080p
-                youtube_object_high_res = youtube_object.streams.filter(file_extension='mp4', res='2160p',
-                                                                        only_video=True).first()  # getting 1440p video resolution
-                if youtube_object_high_res is None:
-                    print("failed to get 4k stream... trying 1440p")
-                    youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1440p',
+
+
+                if audio_only_choice.get() == "no":
+                    resolution = clicked.get()
+                    youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res=resolution,
                                                                             only_video=True).first()
                     if youtube_object_high_res is None:
-                        print("failed to get 1440p stream... trying 1080p")
-                        youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4", res='1080p',
-                                                                                only_video=True).first()
+                        for i in range(4):
+                            youtube_object = YouTube(link)
+                            youtube_object_high_res = youtube_object.streams.filter(file_extension="mp4",
+                                                                                    res=resolution,
+                                                                                    only_video=True).first()
+                            if youtube_object_high_res is not None:
+                                print("got higher resolution. Downloading audio...")
+                                break
+                            else:
+                                print("couldn't get youtube object.")
                     else:
-                        print("got 1440p stream")
-                else:
-                    print("got 4k stream")
-                youtube_object_audio = youtube_object.streams.filter(file_extension='mp4',
-                                                                     only_audio=True).first()  # getting the audio for said video
-
+                        print("got higher resolution. Downloading audio...")
+                if youtube_object_high_res is None:
+                    print("Youtube object is currently None so lower resolution will likely be downloaded instead")
                 try:
 
                     # replacing all "problematic" characters
@@ -432,6 +451,48 @@ root.config(bg='#0F0F0F') #setting the background color to the youtube dark mode
 root.title("Youtube Downloader by jtw") #window title
 root.iconphoto(False, PhotoImage(file= f"{os.getcwd()}\\yt_icon.ico")) #changing the icon of the window to that of youtube
 Label(root, text="Youtube Downloader",bg='#0F0F0F',fg='#fafafa' , font='italic 15 bold').pack(pady=10) #first title label
+
+# resolutions drop menu
+resolution_options = [
+    "144",
+    "240",
+    "360",
+    "480",
+    "720",
+    "1080",
+    "1440",
+    "2160",
+    "4320"
+]
+
+quality_options = [
+    "128",
+    "192",
+    '256'
+]
+quality_choice = StringVar()
+quality_choice.set('128')
+quality_drop = OptionMenu(root, quality_choice, *quality_options)
+quality_drop.config(bg='#0F0F0F', fg='#fafafa', font="italic 10")
+quality_drop.place(x=865, y=140)
+
+clicked = StringVar()
+clicked.set("1080")
+drop = OptionMenu(root, clicked, *resolution_options)
+drop.place(x=625, y=65)
+drop.config(bg='#0F0F0F', fg='#fafafa', font="italic 10")
+
+# yes or no for audio only download
+audio_only_choices = ['yes', 'no']
+audio_only_choice = StringVar()
+audio_only_choice.set("no")
+audio_only_drop = OptionMenu(root, audio_only_choice, *audio_only_choices)
+
+Label(root, text= "Do you want to download audio only?", bg="#0f0f0f", fg="#fafafa", font="italic 10").place(x=710, y=110)
+audio_only_drop.place(x=800, y=140)
+audio_only_drop.config(bg='#0F0F0F', fg='#fafafa', font="italic 10")
+
+
 
 #Downloadng a single video
 Label(root, text = "Download a single video: ",bg='#0F0F0F',fg='#fafafa', font="italic 10").place(x=37, y=72) #label
