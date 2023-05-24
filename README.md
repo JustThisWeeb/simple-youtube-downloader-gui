@@ -1,13 +1,16 @@
 # Important
-It would seem that pytube has started working again but I will keep using yt-dlp for future updates because there are a lot of nice features and it uses ffmpeg to automatically merge videos for me. Not only that but it also gives a nice progressbar for the video downloads. There are some issues I've encountered with it but the same goes for pytube. 
-I will probably try to integrate some of the updates of the new files with pytube and will still continue working with both files but my main focus going forward is going to be related to yt-dlp. 
+I will no longer update the pytube file as yt-dlp seems to have more features and is more stable (plus more recent). I have added the new features to the pytube file but am once again getting streamingdata error so I wouldn't be optimistic about it working again. The yt-dlp file will get my support in the future though. 
+
 
 
 # Requirements: 
 - now yt-dlp is required instead of pytube for the new file. 
-install it with py -m pip install yt-dlp in the cmd
 - ffmpeg. The yt-dlp library uses ffmpeg to format the videos to mp4 so now it's actually a bigger requirement than in the old file that uses pytube. 
 
+
+# Setup
+You might notice the setup.py and ffmpeg_install.py files. You only need to run the setup.py file to install the libraries and ffmpeg. yt-dlp automatically starts installing the moment the script is run and then you'd be given 4 choices. 1 is to download ffmpeg, 2 to decompress (unzip) it, 3 is to add it to environment variables (This one actually doesn't work but I am working towards getting it to work) and 4 is to quit. 
+I am also testing linux support and might update the files to be linux compatible in the near future (tomorrow)
 
 
 # Funnily enough
@@ -76,3 +79,5 @@ ffmpeg -
 28/4/23 - Really big changes related to a pytube bug I've been following for a few days (since around the 25th)
 
 07/5/23 - pytube got patched but I have already added a few QoL features to the new file that uses yt-dlp so I will try integrating them with pytube. I will keep updating both files.
+
+24/05/23 - had free time so I decided to add the new features to the pytube file and fix a few small issues with the yt-dlp file. Also finally uploaded the setup and ffmpeg files (I have had them for about 2 weeks now but forgot to actually upload them here) 
