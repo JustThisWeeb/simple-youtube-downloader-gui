@@ -16,6 +16,9 @@ if platform.system() == "Linux":
     print(result.stdout.decode("utf-8"))
     sleep(5)
     quit()
+result = subprocess.run(['pip', 'install', 'mutagen'], capture_output=True)
+#Print the output
+print(result.stdout.decode('utf-8'))
 
 while True:
     print("Select which option you'd like to use:")
